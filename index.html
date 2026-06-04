@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>1000天 · 余嘉楠 & 杨小爽</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+
+body{
+  font-family:'Noto Serif SC','PingFang SC',serif;
+  background:#fff5f7;color:#4a3030;
+  overflow-x:hidden;
+  -webkit-tap-highlight-color:transparent;
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+
+/* ---------- sparkle canvas ---------- */
+#sparkleC{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  pointer-events:none;z-index:999;
+}
+
+/* ---------- scene ---------- */
+.scene{
+  min-height:100vh;display:flex;align-items:center;
+  justify-content:center;flex-direction:column;
+  padding:50px 20px;position:relative;z-index:1;
+}
+
+/* ---------- cover ---------- */
+#cover{
+  background:linear-gradient(170deg,#ffe0e8 0%,#fccdd6 25%,#f9b5c3 50%,#fccdd6 75%,#ffe0e8 100%);
+  text-align:center;
+}
+#cover canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+
+.envelope-wrap{
+  position:relative;z-index:1;
+  width:clamp(270px,75vw,380px);cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.envelope-card{
+  background:#fff;border-radius:22px;
+  padding:50px 28px 35px;
+  box-shadow:0 20px 50px rgba(200,120,140,.18);
+  position:relative;overflow:hidden;
+  transition:transform .3s;
+}
+.envelope-card:active{transform:scale(.97);}
+.envelope-flap-top{
+  position:absolute;top:0;left:0;right:0;height:120px;
+  background:linear-gradient(180deg,#fff 0%,#fef0f3 100%);
+  border-radius:22px 22px 0 0;z-index:2;
+  transform-origin:top center;
+  transition:transform .7s cubic-bezier(.22,1,.36,1);
+  box-shadow:0 4px 15px rgba(0,0,0,.04);
+}
+.envelope-flap-top.open{transform:rotateX(180deg);}
+.envelope-flap-top::after{
+  content:'';position:absolute;bottom:-18px;left:50%;
+  transform:translateX(-50%);
+  width:0;height:0;
+  border-left:22px solid transparent;
+  border-right:22px solid transparent;
+  border-top:18px solid #fef0f3;
+}
+.envelope-seal{
+  width:58px;height:58px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%,#f7c8d3,#e8879e);
+  margin:15px auto 30px;position:relative;z-index:3;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;box-shadow:0 4px 20px rgba(230,130,150,.3);
+  animation:sealPulse 2.5s ease-in-out infinite;
+}
+@keyframes sealPulse{
+  0%,100%{box-shadow:0 4px 20px rgba(230,130,150,.3);}
+  50%{box-shadow:0 4px 40px rgba(230,130,150,.5),0 0 70px rgba(250,150,180,.25);}
+}
+.envelope-label{
+  font-size:12px;color:#e8879e;letter-spacing:.35em;margin-bottom:14px;
+}
+.envelope-names{
+  font-size:clamp(20px,5vw,28px);font-weight:600;letter-spacing:.1em;
+}
+.envelope-names span{font-family:'Ma Shan Zheng',cursive;color:#f2a6b5;font-weight:400;}
+.envelope-sub{
+  font-size:11px;color:#c9a0a0;margin-top:8px;letter-spacing:.2em;
+}
+.envelope-tap{
+  margin-top:30px;font-size:12px;color:#f2a6b5;letter-spacing:.25em;
+  animation:breathe 2s ease-in-out infinite;
+}
+@keyframes breathe{0%,100%{opacity:.5;}50%{opacity:1;}}
+
+/* ---------- story card ---------- */
+.story-scene{background:linear-gradient(180deg,#fff5f7 0%,#fff0f3 50%,#fff5f7 100%);}
+.card{
+  max-width:400px;width:100%;text-align:center;
+  background:#fff;border-radius:24px;padding:44px 26px;
+  box-shadow:0 12px 40px rgba(180,120,140,.07);
+  opacity:0;transform:translateY(20px);
+  transition:opacity .8s,transform .8s;
+}
+.card.show{opacity:1;transform:translateY(0);}
+
+.card-emoji{
+  font-size:clamp(46px,13vw,66px);margin-bottom:20px;
+  animation:floatEmoji 3s ease-in-out infinite;
+  display:inline-block;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.card-emoji:active{transform:scale(1.2);}
+@keyframes floatEmoji{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+
+.card-num{font-size:10px;color:#f2a6b5;letter-spacing:.4em;margin-bottom:10px;}
+.card-title{font-size:clamp(19px,5vw,28px);font-weight:700;line-height:1.5;margin-bottom:14px;}
+.card-desc{font-size:14px;color:#7a6060;line-height:2.1;}
+.card-note{margin-top:22px;padding-top:18px;border-top:1px solid #fde2e8;font-size:13px;color:#b89898;line-height:2;font-style:italic;}
+.card-tap{margin-top:20px;font-size:11px;color:#f2a6b5;letter-spacing:.2em;}
+
+/* ---------- scratch card ---------- */
+.scratch-box{
+  width:260px;height:110px;border-radius:16px;
+  position:relative;overflow:hidden;margin:0 auto;
+  box-shadow:0 8px 25px rgba(0,0,0,.05);
+  touch-action:none;user-select:none;-webkit-user-select:none;
+}
+.scratch-box canvas{
+  position:absolute;inset:0;z-index:2;border-radius:16px;
+}
+.scratch-under{
+  position:absolute;inset:0;z-index:1;border-radius:16px;
+  background:linear-gradient(135deg,#fffaf0,#fff5f5);
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:700;color:#4a3030;
+}
+
+/* ---------- candle ---------- */
+.candle-area{text-align:center;margin-top:16px;}
+.candle-cake{
+  font-size:clamp(56px,15vw,96px);cursor:pointer;
+  display:inline-block;transition:transform .2s;
+  animation:floatEmoji 3s ease-in-out infinite;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+}
+.candle-cake:active{transform:scale(.9);}
+.candle-flame{
+  position:absolute;top:-38px;left:50%;transform:translateX(-50%);
+  font-size:32px;animation:flicker .25s ease-in-out infinite alternate;
+}
+@keyframes flicker{
+  0%{transform:translateX(-50%) scale(1) rotate(-3deg);opacity:.9;}
+  100%{transform:translateX(-50%) scale(1.1) rotate(3deg);opacity:1;}
+}
+
+/* ---------- countdown ---------- */
+#countdown{
+  background:linear-gradient(180deg,#fff0f3 0%,#f9b5c3 40%,#e8879e 100%);
+  color:#fff;
+}
+.cd-grid{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.cd-item{
+  text-align:center;min-width:55px;
+  background:rgba(255,255,255,.2);border-radius:16px;
+  padding:16px 14px;
+}
+.cd-val{font-size:clamp(34px,9vw,56px);font-weight:700;line-height:1;}
+.cd-tag{font-size:10px;letter-spacing:.2em;margin-top:6px;opacity:.8;}
+
+/* ---------- finale ---------- */
+#finale{
+  background:linear-gradient(180deg,#e8879e 0%,#c96a80 30%,#3d1825 80%,#1a0a10 100%);
+  color:#fff;text-align:center;
+}
+.finale-card{max-width:440px;width:100%;}
+.finale-to{font-size:12px;color:#f7c8d3;letter-spacing:.3em;margin-bottom:26px;}
+.finale-body{font-size:clamp(15px,3.5vw,17px);line-height:2.5;font-weight:300;}
+.finale-body b{color:#d4b87a;font-weight:600;}
+.finale-sign{margin-top:36px;font-size:13px;line-height:2.2;color:#f7c8d3;}
+.finale-star{
+  display:inline-block;font-size:40px;margin-top:30px;
+  cursor:pointer;transition:transform .3s;
+  animation:floatEmoji 3.5s ease-in-out infinite;
+  -webkit-tap-highlight-color:transparent;
+}
+.finale-star:active{transform:scale(1.3);}
+
+/* ---------- firework layer ---------- */
+#fwL{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1000;}
+.fw-p{
+  position:absolute;border-radius:50%;
+  animation:fwB 1.2s ease-out forwards;
+}
+@keyframes fwB{
+  0%{transform:translate(0,0) scale(1);opacity:1;}
+  100%{transform:translate(var(--x),var(--y)) scale(0);opacity:0;}
+}
+
+/* pop burst for emoji tap */
+.pop-p{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:1001;
+  animation:popB .7s ease-out forwards;
+}
+@keyframes popB{
+  0%{transform:translate(0,0) scale(1);opacity:1;}
+  100%{transform:translate(var(--px),var(--py)) scale(0);opacity:0;}
+}
+
+/* mobile */
+@media(max-width:600px){
+  .scene{padding:40px 16px;}
+  .card{padding:32px 20px;}
+  .card-desc{font-size:13px;}
+}
+
+/* smooth reveal */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .8s,transform .8s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<canvas id="sparkleC"></canvas>
+<div id="fwL"></div>
+
+<!-- ═══════════ cover ═══════════ -->
+<section class="scene" id="cover">
+  <canvas id="cloudC"></canvas>
+  <div class="envelope-wrap" id="envelopeWrap" ontouchend="" onmouseup="">
+    <div class="envelope-card">
+      <div class="envelope-flap-top" id="flap"></div>
+      <div class="envelope-seal">💌</div>
+      <div class="envelope-label">一 封 预 告 信</div>
+      <div class="envelope-names">余嘉楠 <span>&</span> 杨小爽</div>
+      <div class="envelope-sub">第 1000 天 · 纪念日计划</div>
+    </div>
+  </div>
+  <div class="envelope-tap" id="coverTap">👆 点信封打开</div>
+</section>
+
+<!-- ═══════════ 1000天 ═══════════ -->
+<section class="scene story-scene" id="sc1">
+  <div class="card reveal" data-reveal>
+    <div class="card-emoji" onclick="popBurst(this)">💝</div>
+    <div class="card-num">✦</div>
+    <div class="card-title">第 <b style="color:#f2a6b5;">1000</b> 天</div>
+    <div class="card-desc">
+      2023.09.16 → 2026.06.12<br>
+      一千个日夜 · 一千次晚安 · 一千遍想你
+    </div>
+    <div class="card-note">这一天我们哪儿也不去<br><b style="color:#f2a6b5;">就在家里</b></div>
+    <div class="card-tap">👆 点心心看特效</div>
+  </div>
+</section>
+
+<!-- ═══════════ 化妆 ═══════════ -->
+<section class="scene story-scene" id="sc2">
+  <div class="card reveal" data-reveal>
+    <div class="card-emoji" onclick="popBurst(this)">💄</div>
+    <div class="card-num">第 一 幕</div>
+    <div class="card-title">杨小爽<br>会画美美的妆</div>
+    <div class="card-desc">
+      坐在镜子前<br>慢慢地、认真地<br>把最美的自己画出来
+    </div>
+    <div class="card-note">
+      也许会纠结哪支口红更好看<br>
+      也许会回头问「好不好看」<br>
+      ——答案永远是<b style="color:#f2a6b5;">好看</b>
+    </div>
+    <div class="card-tap">👆 点口红试试</div>
+  </div>
+</section>
+
+<!-- ═══════════ 拍照 ═══════════ -->
+<section class="scene story-scene" id="sc3">
+  <div class="card reveal" data-reveal>
+    <div class="card-emoji" onclick="popBurst(this)">📸</div>
+    <div class="card-num">第 二 幕</div>
+    <div class="card-title">余嘉楠<br>会给她拍照</div>
+    <div class="card-desc">
+      相机早就准备好了<br>
+      但最好的素材永远是<br><b style="color:#f2a6b5;">她的笑</b>
+    </div>
+    <div class="card-note">
+      拍她认真看镜头的瞬间<br>
+      拍她被逗到憋不住笑的瞬间<br>
+      拍第一千天依然让他心动的瞬间<br>
+      每一张都<b style="color:#f2a6b5;">不舍得删</b>
+    </div>
+    <div class="card-tap">👆 点相机看闪光</div>
+  </div>
+</section>
+
+<!-- ═══════════ 漂亮饭 ═══════════ -->
+<section class="scene story-scene" id="sc4">
+  <div class="card reveal" data-reveal>
+    <div class="card-emoji" onclick="popBurst(this)">🍽️</div>
+    <div class="card-num">第 三 幕</div>
+    <div class="card-title">吃属于我们的漂亮饭</div>
+    <div class="card-desc">
+      牛排 · 意面 · 红酒<br>
+      最好的桌布铺上<br>
+      蜡烛把她的脸照得暖洋洋
+    </div>
+    <div class="card-note">
+      碰杯的时候对视一眼<br>
+      一千天的默契<br>
+      <b style="color:#f2a6b5;">全在酒里</b>
+    </div>
+    <div class="card-tap">👆 点盘子碰个杯</div>
+  </div>
+</section>
+
+<!-- ═══════════ 蛋糕 ═══════════ -->
+<section class="scene story-scene" id="sc5">
+  <div class="card reveal" data-reveal>
+    <div class="card-emoji" onclick="popBurst(this)">🎂</div>
+    <div class="card-num">第 四 幕</div>
+    <div class="card-title">切属于我们的<br>一千天蛋糕</div>
+    <div class="card-desc">
+      蛋糕上写着 <strong>1000</strong><br>
+      第一刀两个人一起切<br>
+      第一口喂给对方
+    </div>
+    <div class="card-note">
+      甜的不只是奶油和草莓<br>
+      是这一千天里<b style="color:#f2a6b5;">所有的好</b>
+    </div>
+    <div class="candle-area">
+      <div class="candle-cake" id="candleCake" onclick="blowCandle()">
+        <span class="candle-flame" id="flame">🕯️</span>
+        🎂
+      </div>
+      <div class="card-tap">👆 点蜡烛吹灭它</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 刮刮卡 ═══════════ -->
+<section class="scene story-scene" id="sc6">
+  <div class="card reveal" data-reveal>
+    <div class="card-emoji" onclick="popBurst(this)">🎁</div>
+    <div class="card-num">彩 蛋</div>
+    <div class="card-title">刮开看看</div>
+    <div class="scratch-box" id="scratchBox">
+      <div class="scratch-under">💗 1000 💗</div>
+      <canvas id="scratchC"></canvas>
+    </div>
+    <div class="card-tap">👆 用手指擦一擦</div>
+  </div>
+</section>
+
+<!-- ═══════════ 倒计时 ═══════════ -->
+<section class="scene" id="countdown">
+  <div class="card reveal" data-reveal style="background:transparent;box-shadow:none;color:#fff;">
+    <div style="font-size:12px;letter-spacing:.3em;margin-bottom:28px;opacity:.8;">距 离 那 一 天 还 有</div>
+    <div class="cd-grid">
+      <div class="cd-item"><div class="cd-val" id="cd-d">--</div><div class="cd-tag">天</div></div>
+      <div class="cd-item"><div class="cd-val" id="cd-h">--</div><div class="cd-tag">时</div></div>
+      <div class="cd-item"><div class="cd-val" id="cd-m">--</div><div class="cd-tag">分</div></div>
+      <div class="cd-item"><div class="cd-val" id="cd-s">--</div><div class="cd-tag">秒</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ 终章 ═══════════ -->
+<section class="scene" id="finale">
+  <div class="finale-card reveal" data-reveal>
+    <div class="finale-to">致 杨 小 爽</div>
+    <div class="finale-body">
+      <p>一千天了。</p>
+      <p>从 <b>2023.09.16</b><br>到 <b>2026.06.12</b>。</p>
+      <p>吵过、闹过、冷战过<br>但最后总是会<br>牵起对方的手。</p>
+      <p>那一天我们哪儿也不去<br><b>就在家里</b></p>
+      <p>你画美美的妆<br>我给你拍最好看的照片<br>我们一起吃牛排、喝红酒<br>切属于我们的一千天蛋糕。</p>
+      <p>这只是一封预告信。<br><b>好戏在那天。</b></p>
+    </div>
+    <div class="finale-sign">
+      你的 余嘉楠<br>
+      2026.06.12<br>
+      第 1000 天 💗
+    </div>
+    <div class="finale-star" onclick="bigFireworks()">✨</div>
+    <div style="color:rgba(255,255,255,.35);font-size:11px;margin-top:10px;">多点几下 ✨</div>
+  </div>
+</section>
+
+<script>
+// ═══════════════════════════════════════
+// Sparkle particle canvas (always-on)
+// ═══════════════════════════════════════
+(function(){
+  const c=document.getElementById('sparkleC');
+  const ctx=c.getContext('2d');
+  let W,H,particles=[];
+  let mx=-999,my=-999;
+
+  function resize(){W=c.width=innerWidth;H=c.height=innerHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+  document.addEventListener('touchmove',e=>{mx=e.touches[0].clientX;my=e.touches[0].clientY;},{passive:true});
+
+  // auto-spawn ambient particles
+  function ambientParticle(){
+    return{
+      x:Math.random()*W, y:H+10,
+      r:1+Math.random()*2.5,
+      vy:-(.3+Math.random()*.7),
+      vx:(Math.random()-.5)*.3,
+      life:1, decay:.003+Math.random()*.007,
+      hue:Math.random()>.5?'340,75%,70%':'30,55%,65%'
+    };
+  }
+  for(let i=0;i<50;i++) particles.push(ambientParticle());
+
+  function spawnBurst(x,y,n,opts={}){
+    for(let i=0;i<n;i++){
+      const ang=Math.PI*2*Math.random();
+      const spd=opts.speed||(2+Math.random()*4);
+      particles.push({
+        x,y,
+        r:opts.size||(1.5+Math.random()*3),
+        vx:Math.cos(ang)*spd,
+        vy:Math.sin(ang)*spd,
+        life:1, decay:opts.decay||(.015+Math.random()*.04),
+        hue:opts.hue||(Math.random()>.5?'340,80%,70%':'30,55%,65%')
+      });
+    }
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=particles.length-1;i>=0;i--){
+      const p=particles[i];
+      p.x+=p.vx;p.y+=p.vy;p.life-=p.decay;
+      if(p.life<=0||p.y<-20||p.y>H+20||p.x<-20||p.x>W+20){
+        particles.splice(i,1);continue;
+      }
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${p.hue},${p.life})`;
+      ctx.fill();
+      // glow
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r*3,0,Math.PI*2);
+      ctx.fillStyle=`hsla(${p.hue},${p.life*.18})`;
+      ctx.fill();
+    }
+    // replenish ambient
+    while(particles.length<50) particles.push(ambientParticle());
+    // cap
+    if(particles.length>350) particles.splice(0,particles.length-350);
+    requestAnimationFrame(draw);
+  }
+  draw();
+
+  // expose
+  window._sparkleBurst=spawnBurst;
+})();
+
+// ═══════════════════════════════════════
+// Cover clouds
+// ═══════════════════════════════════════
+(function(){
+  const c=document.getElementById('cloudC');
+  if(!c)return;
+  const ctx=c.getContext('2d');
+  function resize(){c.width=c.parentElement.offsetWidth;c.height=c.parentElement.offsetHeight;}
+  resize();window.addEventListener('resize',resize);
+
+  const clouds=[];
+  for(let i=0;i<8;i++){
+    clouds.push({
+      x:Math.random()*c.width,
+      y:20+Math.random()*(c.height*.6),
+      w:80+Math.random()*140,
+      h:35+Math.random()*50,
+      speed:.2+Math.random()*.4,
+      opacity:.15+Math.random()*.15
+    });
+  }
+  function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    clouds.forEach(cl=>{
+      cl.x+=cl.speed;
+      if(cl.x>c.width+150)cl.x=-150;
+      const cx=cl.x,cy=cl.y,rx=cl.w/2,ry=cl.h/2;
+      ctx.fillStyle=`rgba(255,255,255,${cl.opacity})`;
+      ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(cx-rx*.5,cy+ry*.3,rx*.55,ry*.7,0,0,Math.PI*2);ctx.fill();
+      ctx.beginPath();ctx.ellipse(cx+rx*.4,cy+ry*.2,rx*.5,ry*.65,0,0,Math.PI*2);ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ═══════════════════════════════════════
+// Open envelope
+// ═══════════════════════════════════════
+let envelopeOpened=false;
+document.getElementById('envelopeWrap').addEventListener('click',function(){
+  if(envelopeOpened)return;
+  envelopeOpened=true;
+  document.getElementById('flap').classList.add('open');
+  document.getElementById('coverTap').style.opacity='0';
+  document.getElementById('coverTap').style.transition='opacity .5s';
+  // burst
+  const r=this.getBoundingClientRect();
+  window._sparkleBurst(r.left+r.width/2,r.top+r.height/2,40,{speed:3,size:2,decay:.02});
+  setTimeout(()=>{
+    document.getElementById('sc1').scrollIntoView({behavior:'smooth'});
+  },700);
+});
+
+// ═══════════════════════════════════════
+// Reveal on scroll
+// ═══════════════════════════════════════
+const revealObs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('visible');
+      revealObs.unobserve(e.target);
+    }
+  });
+},{threshold:.25});
+document.querySelectorAll('[data-reveal]').forEach(el=>revealObs.observe(el));
+
+// manual trigger for any not caught
+setTimeout(()=>{
+  document.querySelectorAll('[data-reveal]').forEach(el=>{
+    const r=el.getBoundingClientRect();
+    if(r.top<window.innerHeight)el.classList.add('visible');
+  });
+},600);
+
+// ═══════════════════════════════════════
+// Emoji pop burst (reliable click)
+// ═══════════════════════════════════════
+function popBurst(el){
+  const r=el.getBoundingClientRect();
+  const cx=r.left+r.width/2,cy=r.top+r.height/2;
+  // canvas particles
+  window._sparkleBurst(cx,cy,22,{speed:3,size:2.5,decay:.02});
+  // DOM heart pops for extra cuteness
+  const hearts=['💕','💖','💗','✨','💝','🌸'];
+  for(let i=0;i<8;i++){
+    const h=document.createElement('div');
+    const ang=Math.PI*2*Math.random();
+    const dist=35+Math.random()*55;
+    h.textContent=hearts[Math.floor(Math.random()*hearts.length)];
+    h.style.cssText=`
+      position:fixed;left:${cx}px;top:${cy}px;font-size:${16+Math.random()*18}px;
+      pointer-events:none;z-index:1002;
+      animation:fwB ${.7+Math.random()*.6}s ease-out forwards;
+      --x:${Math.cos(ang)*dist}px;--y:${Math.sin(ang)*dist}px;
+    `;
+    document.body.appendChild(h);
+    setTimeout(()=>h.remove(),1500);
+  }
+}
+
+// ═══════════════════════════════════════
+// Scratch card
+// ═══════════════════════════════════════
+(function(){
+  const box=document.getElementById('scratchBox');
+  const canvas=document.getElementById('scratchC');
+  const ctx=canvas.getContext('2d');
+  let isScratching=false,revealed=false;
+
+  function init(){
+    const r=box.getBoundingClientRect();
+    canvas.width=r.width;
+    canvas.height=r.height;
+    const grad=ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+    grad.addColorStop(0,'#f0b8c8');grad.addColorStop(.5,'#f5cdd8');grad.addColorStop(1,'#e8a8b8');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle='rgba(255,255,255,.85)';
+    ctx.font='14px "Noto Serif SC",serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('👆 用指甲刮开',canvas.width/2,canvas.height/2);
+  }
+  init();
+  window.addEventListener('resize',()=>{if(!revealed)init();});
+
+  function getXY(e){
+    const r=canvas.getBoundingClientRect();
+    const clientX=e.touches?e.touches[0].clientX:e.clientX;
+    const clientY=e.touches?e.touches[0].clientY:e.clientY;
+    return{ x:clientX-r.left, y:clientY-r.top };
+  }
+
+  function scratch(x,y){
+    if(revealed)return;
+    ctx.globalCompositeOperation='destination-out';
+    ctx.beginPath();ctx.arc(x,y,28,0,Math.PI*2);ctx.fill();
+    ctx.globalCompositeOperation='source-over';
+    // check %
+    const data=ctx.getImageData(0,0,canvas.width,canvas.height);
+    let clear=0;
+    for(let i=3;i<data.data.length;i+=4) if(data.data[i]===0)clear++;
+    const pct=clear/(canvas.width*canvas.height);
+    if(pct>.45&&!revealed){
+      revealed=true;
+      canvas.style.transition='opacity .5s';canvas.style.opacity='0';
+      setTimeout(()=>canvas.style.display='none',500);
+      window._sparkleBurst(
+        box.getBoundingClientRect().left+box.getBoundingClientRect().width/2,
+        box.getBoundingClientRect().top+box.getBoundingClientRect().height/2,
+        30,{speed:3,size:2.5,decay:.02}
+      );
+    }
+  }
+
+  function onDown(e){
+    e.preventDefault();
+    isScratching=true;
+    const{ x,y }=getXY(e);
+    scratch(x,y);
+  }
+  function onMove(e){
+    if(!isScratching)return;
+    e.preventDefault();
+    const{ x,y }=getXY(e);
+    scratch(x,y);
+  }
+  function onUp(){isScratching=false;}
+
+  canvas.addEventListener('mousedown',onDown);
+  canvas.addEventListener('mousemove',onMove);
+  canvas.addEventListener('mouseup',onUp);
+  canvas.addEventListener('mouseleave',onUp);
+  canvas.addEventListener('touchstart',onDown,{passive:false});
+  canvas.addEventListener('touchmove',onMove,{passive:false});
+  canvas.addEventListener('touchend',onUp);
+  canvas.addEventListener('touchcancel',onUp);
+})();
+
+// ═══════════════════════════════════════
+// Blow candle
+// ═══════════════════════════════════════
+let candleBlown=false;
+function blowCandle(){
+  if(candleBlown)return;
+  candleBlown=true;
+  const el=document.getElementById('candleCake');
+  const flame=document.getElementById('flame');
+  flame.style.opacity='0';flame.style.transition='opacity .6s';
+  const r=el.getBoundingClientRect();
+  window._sparkleBurst(r.left+r.width/2,r.top,40,{speed:4,size:3,decay:.02});
+  setTimeout(()=>{
+    flame.textContent='💨';flame.style.opacity='1';
+  },600);
+  setTimeout(()=>{
+    flame.remove();
+    // second burst
+    window._sparkleBurst(r.left+r.width/2,r.top,25,{speed:3,size:2.5,decay:.02});
+  },1200);
+}
+
+// ═══════════════════════════════════════
+// Countdown
+// ═══════════════════════════════════════
+const target=new Date('2026-06-12T00:00:00+08:00');
+(function tick(){
+  const d=Math.max(0,target-Date.now());
+  document.getElementById('cd-d').textContent=Math.floor(d/864e5);
+  document.getElementById('cd-h').textContent=Math.floor((d%864e5)/36e5);
+  document.getElementById('cd-m').textContent=Math.floor((d%36e5)/6e4);
+  document.getElementById('cd-s').textContent=Math.floor((d%6e4)/1e3);
+  setTimeout(tick,1e3);
+})();
+
+// ═══════════════════════════════════════
+// Big fireworks (finale)
+// ═══════════════════════════════════════
+function bigFireworks(){
+  const colors=['#f2a6b5','#f7c8d3','#fde2e8','#d4b87a','#c9b8d9','#fff','#fad4c0','#ffe0e8'];
+  for(let w=0;w<5;w++){
+    setTimeout(()=>{
+      const cx=innerWidth/2+(Math.random()-.5)*280;
+      const cy=innerHeight/2+(Math.random()-.5)*280;
+      // DOM particles
+      for(let i=0;i<50;i++){
+        const p=document.createElement('div');
+        p.className='fw-p';
+        const ang=Math.PI*2/50*i+Math.random()*.3;
+        const dist=65+Math.random()*150;
+        p.style.cssText=`
+          left:${cx}px;top:${cy}px;
+          width:${3+Math.random()*5}px;height:${3+Math.random()*5}px;
+          background:${colors[Math.floor(Math.random()*colors.length)]};
+          --x:${Math.cos(ang)*dist}px;--y:${Math.sin(ang)*dist}px;
+          animation-duration:${.8+Math.random()*1}s;
+        `;
+        document.getElementById('fwL').appendChild(p);
+        setTimeout(()=>p.remove(),1800);
+      }
+      // canvas particles too
+      window._sparkleBurst(cx,cy,35,{speed:5,size:3,decay:.015,hue:'340,80%,70%'});
+    },w*350);
+  }
+}
+
+console.log('💗 余嘉楠 ❤ 杨小爽 · 1000天预告');
+console.log('建议BGM：周杰伦 - 简单爱');
+</script>
+</body>
+</html>
