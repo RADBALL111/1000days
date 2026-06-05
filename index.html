@@ -4,14 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>1000天 · 余嘉楠 & 杨小爽</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💗</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap" media="print" onload="this.media='all';this.onload=null">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Ma+Shan+Zheng&display=swap');
-
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 
 body{
-  font-family:'Noto Serif SC','PingFang SC',serif;
+  font-family:'Noto Serif SC','PingFang SC','Microsoft YaHei','Hiragino Sans GB','STSong',serif;
   background:#fff5f7;color:#4a3030;
   overflow-x:hidden;
   -webkit-tap-highlight-color:transparent;
@@ -232,7 +234,7 @@ body{
 <!-- ═══════════ cover ═══════════ -->
 <section class="scene" id="cover">
   <canvas id="cloudC"></canvas>
-  <div class="envelope-wrap" id="envelopeWrap" ontouchend="" onmouseup="">
+  <div class="envelope-wrap" id="envelopeWrap">
     <div class="envelope-card">
       <div class="envelope-flap-top" id="flap"></div>
       <div class="envelope-seal">💌</div>
@@ -582,7 +584,7 @@ function popBurst(el){
     grad.addColorStop(0,'#f0b8c8');grad.addColorStop(.5,'#f5cdd8');grad.addColorStop(1,'#e8a8b8');
     ctx.fillStyle=grad;ctx.fillRect(0,0,canvas.width,canvas.height);
     ctx.fillStyle='rgba(255,255,255,.85)';
-    ctx.font='14px "Noto Serif SC",serif';
+    ctx.font='14px "PingFang SC","Microsoft YaHei",serif';
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('👆 用指甲刮开',canvas.width/2,canvas.height/2);
   }
